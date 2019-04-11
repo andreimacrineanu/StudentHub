@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "461229977299",
+    "firebase_url": "https://studenthub-3a6ba.firebaseio.com",
+    "project_id": "studenthub-3a6ba",
+    "storage_bucket": "studenthub-3a6ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461229977299:android:aa9c3406af6f8eb0",
+        "android_client_info": {
+          "package_name": "com.project.studenthub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "461229977299-r0a1p2c8qd0jqj0k8l8merqksu5l7rvn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaUmhlQ40ZsHx2gvSJDPs2NbZx6vHXchA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "461229977299-r0a1p2c8qd0jqj0k8l8merqksu5l7rvn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
