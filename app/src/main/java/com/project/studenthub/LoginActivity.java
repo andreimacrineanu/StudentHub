@@ -83,6 +83,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        emailET.setText("test@gmail.com");
+        passwordET.setText("123456");
+        loginBTN.performClick();
         // Check if user is signed in (non-null) and update UI accordingly.
         //FirebaseUser currentUser = mAuth.getCurrentUser();
         //updateUI(currentUser);
@@ -96,6 +99,7 @@ public class LoginActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     Utils.currentUser = new User();
                     Utils.currentUser = dataSnapshot.getValue(User.class);
+                    Log.d(TAG,"Cursurile : " + Utils.currentUser.getClasses().toString());
                     Intent intent = new Intent(App.getInstance(), MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);

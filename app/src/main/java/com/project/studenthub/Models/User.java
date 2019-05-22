@@ -1,11 +1,15 @@
 package com.project.studenthub.Models;
 
+import java.util.HashMap;
+import java.util.List;
+
 public class User {
     private String UID;
     private String email;
     private String nume;
     private String prenume;
     private String grupa;
+    private HashMap<String, String> classes;
 
     public User (String UID, String email, String nume, String prenume, String grupa){
         this.UID = UID;
@@ -57,5 +61,13 @@ public class User {
 
     public String getGrupa() {
         return grupa;
+    }
+
+    public HashMap<String, String> getClasses() {
+        return classes;
+    }
+
+    public void setClasses(HashMap<String, String> classes) {
+        this.classes = classes;
     }
 }
