@@ -7,4 +7,5 @@ import com.project.studenthub.Models.User;
 public class Utils {
     public static final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("development");
     public static User currentUser;
+
 }

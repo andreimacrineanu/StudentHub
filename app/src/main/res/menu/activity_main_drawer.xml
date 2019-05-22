@@ -23,7 +23,7 @@
     <!--</group>-->
         <item android:id="@+id/classesItemId" android:title="Classes">
             <menu>
-                <item android:id="@+id/nav_enrole_to_class" android:title="Enroll to a class"/>
+                <item android:id="@+id/nav_enroll_to_class" android:title="Enroll to a class"/>
             </menu>
         </item>
 

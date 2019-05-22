@@ -33,6 +33,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -88,7 +89,9 @@ public class MainActivity extends AppCompatActivity
     private List<Post> posts;
     private List<Uri> images;
     private PostAdapter postAdapter;
-
+    private TextView cursTitleTV;
+    private String classId;
+    private String previousCalled = null;
 
 
     @Override
@@ -111,31 +114,24 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        Menu menu = navigationView.getMenu();
-        SubMenu classesSubMenu = menu.getItem(0).getSubMenu();
-        int k = 1 ;
-        Log.d(TAG, "Item submenu " + classesSubMenu.getItem(0).getTitle());
-        for(Map.Entry<String, String> studentClass : Utils.currentUser.getClasses().entrySet()){
-            Log.d(TAG, "Class : " + studentClass.getValue());
-            classesSubMenu.add(0, k,0,studentClass.getValue());
-            k++;
-        }
+
+        //Add classes to drawer
+        AddClassesToDrawer(navigationView);
+
 
         uploadImageBTN = findViewById(R.id.uploadBTN);
         postsLV = findViewById(R.id.postsLV);
+        cursTitleTV = findViewById(R.id.classTitleTV);
 
         uploadImageBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(App.getInstance(), UploadImageActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("classId", classId);
                 startActivity(intent);
             }
         });
-
-
-
-        //DatabaseReference getClasses = Utils.mDatabase.child("")
 
         DatabaseReference ref = Utils.mDatabase.child("grupa"+Utils.currentUser.getGrupa());
 //        ref.addValueEventListener(new ValueEventListener() {
@@ -197,7 +193,20 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void AddClassesToDrawer (){
+    private void AddClassesToDrawer (NavigationView navigationView){
+        Menu menu = navigationView.getMenu();
+        SubMenu classesSubMenu = menu.getItem(0).getSubMenu();
+        Log.d(TAG, "Item submenu " + classesSubMenu.getItem(0).getTitle());
+        Integer minItemId = 0;
+        for(Map.Entry<String, String> studentClass : Utils.currentUser.getClasses().entrySet()){
+            String getCounter = studentClass.getKey().substring(4);
+            int id = Integer.valueOf(getCounter);
+            Log.d(TAG, "Class : " + getCounter);
+            classesSubMenu.add(0, id,0,studentClass.getValue());
+        }
+        if (Utils.currentUser.getClasses().isEmpty()){
+            uploadImageBTN.setEnabled(false);
+        }
 
     }
 
@@ -256,13 +265,49 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
-        else if(id == 1){
-            Log.d(TAG, "A apasat pe o materie !");
+        else if(id == R.id.nav_enroll_to_class){
+            uploadImageBTN.setEnabled(false);
+            cursTitleTV.setText("Enroll to a class");
+            previousCalled = Integer.toString(R.id.nav_enroll_to_class);
+            postsLV.setAdapter(null);
+        }
+        else {
+            uploadImageBTN.setEnabled(true);
+            classId = "curs" + id;
+            cursTitleTV.setText(Utils.currentUser.getClasses().get(classId));
+            Boolean resetList = false;
+            if(previousCalled == null) resetList = true;
+            else if (!previousCalled.equals(classId)) resetList = true;
+
+            if (resetList) AddPostsToList(classId);
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void AddPostsToList (String classId){
+        previousCalled = classId;
+        postsLV.setAdapter(null);
+        DatabaseReference classes = Utils.mDatabase.child("posts").child(classId);
+        classes.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Post> posts = new ArrayList<>();
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    posts.add(child.getValue(Post.class));
+                }
+                PostAdapter postAdapter = new PostAdapter(getApplicationContext(), posts);
+                postsLV.setAdapter(postAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

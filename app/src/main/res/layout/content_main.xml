@@ -9,13 +9,25 @@
     tools:showIn="@layout/app_bar_main"
     android:layout_weight="5">
 
+    <TextView
+        android:id="@+id/classTitleTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enroll to a class"
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/postsLV"
+        android:textColor="@color/colorBlack"/>
+
     <ListView
         android:id="@+id/postsLV"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/classTitleTV"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/uploadBTN"
@@ -25,12 +37,18 @@
     <Button
         android:id="@+id/uploadBTN"
         app:layout_constraintTop_toBottomOf="@id/postsLV"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Upload image"
+        app:layout_constrainedWidth="true"
+        app:layout_constrainedHeight="true"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:text="+"
+        android:gravity="center"
+        android:enabled="false"
         />
 
 

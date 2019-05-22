@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -31,12 +32,15 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.project.studenthub.Models.Image;
+import com.project.studenthub.Models.Post;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import okhttp3.internal.Util;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
@@ -48,17 +52,31 @@ public class UploadImageActivity extends AppCompatActivity {
     private ImageView takenPictureIV;
     private ProgressDialog progressBar;
     private FirebaseStorage firebaseStorage;
-    private Image currentImage;
+    private Image currentImage = null;
+    private String classId;
+    private EditText descriptionET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_image);
 
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if(extras == null) {
+                classId = null;
+            } else {
+                classId = extras.getString("classId");
+            }
+        } else {
+            classId = (String) savedInstanceState.getSerializable("classId");
+        }
+
         takePictureBTN = findViewById(R.id.takePictureBTN);
         takenPictureIV = findViewById(R.id.uploadedImageIV);
         uploadPictureBTN = findViewById(R.id.uploadBTN);
         progressBar = new ProgressDialog(UploadImageActivity.this);
+        descriptionET = findViewById(R.id.descriptionET);
 
         firebaseStorage = FirebaseStorage.getInstance();
 
@@ -69,7 +87,9 @@ public class UploadImageActivity extends AppCompatActivity {
 
                 if (ContextCompat.checkSelfPermission(App.getInstance(),
                         Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED){
+                        == PackageManager.PERMISSION_GRANTED &&
+                        ContextCompat.checkSelfPermission(App.getInstance(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED){
                     PictureTakerAction();
                 }
                 else
@@ -84,41 +104,61 @@ public class UploadImageActivity extends AppCompatActivity {
         uploadPictureBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    progressBar.setMessage("Uploading Image...");
-                    progressBar.show();
-                    DatabaseReference ref = Utils.mDatabase.child("grupa"+Utils.currentUser.getGrupa()).child(Utils.currentUser.getUID());
-                    String newKey = ref.push().getKey();
+                if (currentImage != null) {
+                    try {
+                        progressBar.setMessage("Uploading Image...");
+                        progressBar.show();
+                        DatabaseReference ref = Utils.mDatabase.child("grupa" + Utils.currentUser.getGrupa()).child(Utils.currentUser.getUID());
+                        String newKey = ref.push().getKey();
                     /*Image newImage = new Image();
                     newImage.setUID(newKey);
                     newImage.setImage_title(pathToFile.substring(pathToFile.lastIndexOf("/")+1));*/
-                    ref.child(newKey).setValue(currentImage.getImage_title()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            StorageReference sr = firebaseStorage.getReference().child("images/users/"+ Utils.currentUser.getUID() + "/" + currentImage.getImage_title());
-                            sr.putFile(currentImage.getUri()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    Uri downloadUrl = taskSnapshot.getUploadSessionUri();
-                                    progressBar.dismiss();
-                                    Toast.makeText(App.getInstance(),"Upload Success",Toast.LENGTH_LONG);
-                                    finish();
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    progressBar.dismiss();
-                                    Toast.makeText(App.getInstance(),"Uploaded Failed",Toast.LENGTH_SHORT);
-                                }
-                            });
-                        }
-                    });
+                        ref.child(newKey).setValue(currentImage.getImage_title()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                StorageReference sr = firebaseStorage.getReference().child("images/users/" + Utils.currentUser.getUID() + "/" + currentImage.getImage_title());
+                                sr.putFile(currentImage.getUri()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        sr.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
+                                                Post post = new Post();
+                                                post.setUserId(Utils.currentUser.getUID());
+                                                post.setUserDisplayName(Utils.currentUser.getPrenume() + " " + Utils.currentUser.getNume());
+                                                post.setPictureUri(uri.toString());
+                                                post.setDescription(descriptionET.getText().toString().trim());
+                                                post.setId(Utils.mDatabase.child("posts").child(classId).push().getKey());
+                                                Utils.mDatabase.child("posts").child(classId).child(post.getId()).setValue(post).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        //while(!task.isComplete()){}
+                                                        if (task.isSuccessful()) {
+                                                            progressBar.dismiss();
+                                                            Toast.makeText(App.getInstance(), "Upload Success", Toast.LENGTH_LONG);
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        progressBar.dismiss();
+                                        Toast.makeText(App.getInstance(), "Uploaded Failed", Toast.LENGTH_SHORT);
+                                    }
+                                });
+                            }
+                        });
+
+                    } catch (Exception ex) {
+
+                    }
 
                 }
-                catch (Exception ex){
-
-                }
-
             }
         });
 

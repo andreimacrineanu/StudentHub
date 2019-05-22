@@ -15,7 +15,27 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/takePictureBTN"/>
+        app:layout_constraintBottom_toTopOf="@id/descriptionRL"/>
+    <RelativeLayout
+        android:id="@+id/descriptionRL"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        app:layout_constraintTop_toBottomOf="@id/uploadedImageIV"
+        app:layout_constraintBottom_toTopOf="@id/takePictureBTN"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+        <EditText
+            android:id="@+id/descriptionET"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="Description"
+            android:textSize="15sp"
+            android:lines="4"
+            android:padding="10dp"/>
+    </RelativeLayout>
+
     <Button
         android:id="@+id/takePictureBTN"
         android:layout_width="250dp"

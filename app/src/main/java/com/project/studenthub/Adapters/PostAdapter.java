@@ -17,6 +17,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.project.studenthub.Models.Image;
+import com.project.studenthub.Models.Post;
 import com.project.studenthub.R;
 
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public class PostAdapter extends BaseAdapter {
 
     private final static String TAG = PostAdapter.class.getSimpleName();
     private Context context;
-    private List<Uri> images;
+    private List<Post> images;
     private static LayoutInflater inflater = null;
     private final RequestOptions options = new RequestOptions()
             .override(600, 200)
@@ -34,7 +35,7 @@ public class PostAdapter extends BaseAdapter {
             .priority(Priority.HIGH);
 
 
-    public PostAdapter(Context context, List<Uri> images){
+    public PostAdapter(Context context, List<Post> images){
         this.context = context;
         this.images = images;
     }
@@ -45,7 +46,7 @@ public class PostAdapter extends BaseAdapter {
     }
 
     @Override
-    public Uri getItem(int position) {
+    public Post getItem(int position) {
         return images.get(position);
     }
 
@@ -56,7 +57,7 @@ public class PostAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Uri currentImage = getItem(position);
+        Post currentImage = getItem(position);
         try{
             final ImageHolder holder;
             if (convertView == null){
@@ -70,7 +71,7 @@ public class PostAdapter extends BaseAdapter {
                 holder = (ImageHolder) convertView.getTag();
             }
 
-           Glide.with(context).load(currentImage).apply(options).into(holder.image);
+           Glide.with(context).load(Uri.parse(currentImage.getPictureUri())).apply(options).into(holder.image);
             //holder.image.setImageDrawable(currentImage.getDrawable());
         }
         catch (Exception ex){
