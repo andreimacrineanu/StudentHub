@@ -4,54 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="5"
+    android:background="#FFF3E0"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
-    tools:showIn="@layout/app_bar_main"
-    android:layout_weight="5">
+    tools:showIn="@layout/app_bar_main">
 
     <TextView
         android:id="@+id/classTitleTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:background="@drawable/side_nav_bar"
+        android:gravity="center"
         android:text="Enroll to a class"
+        android:textColor="@color/browser_actions_bg_grey"
         android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/postsLV"
-        android:textColor="@color/colorBlack"/>
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ListView
         android:id="@+id/postsLV"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:cacheColorHint="#FFF3E0"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toBottomOf="@+id/classTitleTV"
+        app:layout_constraintBottom_toTopOf="@id/uploadBTN"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/uploadBTN"
-        >
-    </ListView>
+        app:layout_constraintTop_toBottomOf="@+id/classTitleTV"></ListView>
 
     <Button
         android:id="@+id/uploadBTN"
-        app:layout_constraintTop_toBottomOf="@id/postsLV"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constrainedWidth="true"
-        app:layout_constrainedHeight="true"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:foregroundGravity="bottom"
+        android:gravity="center"
+        android:text="+"
         android:textSize="30sp"
         android:textStyle="bold"
-        android:text="+"
-        android:gravity="center"
-        android:enabled="false"
-        />
-
-
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

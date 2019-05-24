@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="250dp">
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentRight="false"
+    android:background="#FFF3E0"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/pictureTitleTV"
@@ -9,38 +13,53 @@
         android:layout_height="30dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="false"
-        android:layout_margin="10dp"
         android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp"
-        android:gravity="center_horizontal"
+        android:background="#FFF3E0"
+        android:gravity="center_horizontal|top"
         android:text="Picture 1"
-        android:textSize="25sp" />
+        android:textColor="@color/browser_actions_title_color"
+        android:textColorLink="#E1F5FE"
+        android:textSize="18sp" />
 
     <ImageView
         android:id="@+id/pictureIV"
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:layout_below="@+id/pictureTitleTV"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="false"
-        android:layout_margin="10dp"
+        android:layout_alignParentBottom="false"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#FFF3E0"
         android:clickable="true"
         android:contentDescription="description"
-        android:focusable="true" />
+        android:cropToPadding="true"
+        android:focusable="true"
+        android:scaleType="fitCenter" />
 
     <TextView
         android:id="@+id/pictureDescriptionTV"
         android:layout_width="150dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
         android:layout_toEndOf="@id/pictureTitleTV"
         android:layout_toRightOf="@id/pictureTitleTV"
+        android:background="#E0F2F1"
         android:clickable="false"
         android:gravity="center_horizontal"
-        android:text="TextView" />
+        android:text="TextView"
+        android:textColor="@color/browser_actions_title_color" />
 </RelativeLayout>
