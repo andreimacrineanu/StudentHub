@@ -19,6 +19,7 @@
         android:text="Enroll to a class"
         android:textColor="@color/browser_actions_bg_grey"
         android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/postsLV"
@@ -31,6 +32,7 @@
         android:cacheColorHint="#FFF3E0"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
+        app:layout_constraintTop_toBottomOf="@id/classTitleTV"
         app:layout_constraintBottom_toTopOf="@id/uploadBTN"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -49,6 +51,7 @@
         android:textStyle="bold"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
+        app:layout_constraintTop_toBottomOf="@id/postsLV"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
