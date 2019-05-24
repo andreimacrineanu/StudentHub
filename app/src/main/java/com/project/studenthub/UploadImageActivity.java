@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,8 +32,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.project.studenthub.APIRequests.ImageAPI;
 import com.project.studenthub.Models.Image;
 import com.project.studenthub.Models.Post;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,11 +48,18 @@ import java.util.Date;
 import java.util.Locale;
 
 import okhttp3.internal.Util;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
+import static com.project.studenthub.APIRequests.ImageAPI.BASE_URL;
 
 public class UploadImageActivity extends AppCompatActivity {
 
+    private final static String TAG = UploadImageActivity.class.getSimpleName();
     private String pathToFile;
     private Button takePictureBTN;
     private Button uploadPictureBTN;
@@ -54,7 +68,24 @@ public class UploadImageActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage;
     private Image currentImage = null;
     private String classId;
+    private static final String apiKey = "AIzaSyCw6dLHoce8gNL7Rni-AUStAe2VCmIc8A4";
     private EditText descriptionET;
+    private String pictureJson = "{"+
+            "\"requests\": [" +
+    "{ " +
+        "\"image\": {"+
+        "\"source\": {"+
+            "\"imageUri\": \"salut\""+
+        "}"+
+    "}," +
+        "\"features\": ["+
+        "{"+
+            "\"type\": \"DOCUMENT_TEXT_DETECTION\" " +
+        "}"+
+      "]"+
+    "}"+
+  "]"+
+"}";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +166,36 @@ public class UploadImageActivity extends AppCompatActivity {
                                                         //while(!task.isComplete()){}
                                                         if (task.isSuccessful()) {
                                                             progressBar.dismiss();
+//                                                            try {
+                                                                Gson gson = new Gson();
+//                                                                JSONObject jsonObject = new JSONObject(pictureJson);
+//                                                                jsonObject.getJSONArray("requests").getJSONObject(0).getJSONObject("image").getJSONObject("source").put("imageUri",post.getPictureUri());
+//                                                                Retrofit retrofit = new Retrofit.Builder()
+//                                                                        .baseUrl(BASE_URL)
+//                                                                        .addConverterFactory(GsonConverterFactory.create())
+//                                                                        .build();
+//
+//                                                                ImageAPI imageAPI = retrofit.create(ImageAPI.class);
+//                                                                Call<JSONObject> call = imageAPI.sendImage(jsonObject);
+//                                                                call.enqueue(new Callback<JSONObject>() {
+//                                                                    @Override
+//                                                                    public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+//                                                                        try {
+//                                                                            Log.d(TAG, "Acesta este raspunsul : " + response.body().toString());
+//                                                                        }catch(Exception ex){
+//                                                                            Log.d(TAG, "NU A MERS 1 : " + response.message());
+//                                                                        }
+//                                                                    }
+//
+//                                                                    @Override
+//                                                                    public void onFailure(Call<JSONObject> call, Throwable t) {
+//                                                                        Log.d(TAG, "NU A MERS : " + t.getMessage());
+//                                                                    }
+//                                                                });
+//                                                                Log.d(TAG,"Acesta este jsonu-ul : " + jsonObject.toString());
+//                                                            } catch (JSONException e) {
+//                                                                e.printStackTrace();
+//                                                            }
                                                             Toast.makeText(App.getInstance(), "Upload Success", Toast.LENGTH_LONG);
                                                             finish();
                                                         }

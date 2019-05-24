@@ -15,6 +15,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.telephony.SmsMessage;
@@ -49,6 +52,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.project.studenthub.Adapters.PostAdapter;
+import com.project.studenthub.Fragments.EnrollClassFragment;
 import com.project.studenthub.Models.Image;
 import com.project.studenthub.Models.Post;
 import com.project.studenthub.Models.User;
@@ -78,7 +82,7 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 * Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, EnrollClassFragment.OnCompleteListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final long ONE_MEGABYTE = 1024 * 1024;
@@ -92,6 +96,7 @@ public class MainActivity extends AppCompatActivity
     private TextView cursTitleTV;
     private String classId;
     private String previousCalled = null;
+    private NavigationView navigationView;
 
 
     @Override
@@ -112,11 +117,11 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         //Add classes to drawer
-        AddClassesToDrawer(navigationView);
+        AddClassesToDrawer();
 
 
         uploadImageBTN = findViewById(R.id.uploadBTN);
@@ -193,7 +198,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void AddClassesToDrawer (NavigationView navigationView){
+    public void AddClassesToDrawer (){
         Menu menu = navigationView.getMenu();
         SubMenu classesSubMenu = menu.getItem(0).getSubMenu();
         Log.d(TAG, "Item submenu " + classesSubMenu.getItem(0).getTitle());
@@ -209,6 +214,7 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+
 
 
     @Override
@@ -266,10 +272,11 @@ public class MainActivity extends AppCompatActivity
             });
         }
         else if(id == R.id.nav_enroll_to_class){
-            uploadImageBTN.setEnabled(false);
-            cursTitleTV.setText("Enroll to a class");
-            previousCalled = Integer.toString(R.id.nav_enroll_to_class);
-            postsLV.setAdapter(null);
+//            uploadImageBTN.setEnabled(false);
+//            cursTitleTV.setText("Enroll to a class");
+//            previousCalled = Integer.toString(R.id.nav_enroll_to_class);
+//            postsLV.setAdapter(null);
+            DisplayEnrollToClass();
         }
         else {
             uploadImageBTN.setEnabled(true);
@@ -286,6 +293,18 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void DisplayEnrollToClass (){
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getSupportFragmentManager().findFragmentByTag("enroll");
+        if (prev != null){
+            fragmentTransaction.remove(prev);
+        }
+        fragmentTransaction.addToBackStack(null);
+
+        DialogFragment dialogFragment = new EnrollClassFragment();
+        dialogFragment.show(fragmentTransaction, "enroll");
     }
 
     private void AddPostsToList (String classId){
@@ -310,6 +329,33 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void AddSingleClassToDrawer (){
+        Menu menu = navigationView.getMenu();
+        SubMenu classesSubMenu = menu.getItem(0).getSubMenu();
+        Log.d(TAG, "Item submenu " + classesSubMenu.getItem(0).getTitle());
+        Integer minItemId = 0;
+        for(Map.Entry<String, String> studentClass : Utils.currentUser.getClasses().entrySet()){
+            String getCounter = studentClass.getKey().substring(4);
+            int id = Integer.valueOf(getCounter);
+            Log.d(TAG, "Class : " + getCounter);
+            classesSubMenu.add(0, id,0,studentClass.getValue());
+        }
+        if (Utils.currentUser.getClasses().isEmpty()){
+            uploadImageBTN.setEnabled(false);
+        }
+    }
 
 
+    @Override
+    public void onComplete(Map.Entry<String, String> studentClass) {
+        Menu menu = navigationView.getMenu();
+        SubMenu classesSubMenu = menu.getItem(0).getSubMenu();
+        String getCounter = studentClass.getKey().substring(4);
+        int id = Integer.valueOf(getCounter);
+        Log.d(TAG, "Class : " + getCounter);
+        classesSubMenu.add(0, id,0,studentClass.getValue());
+        if (Utils.currentUser.getClasses().isEmpty()){
+            uploadImageBTN.setEnabled(false);
+        }
+    }
 }

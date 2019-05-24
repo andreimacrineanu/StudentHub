@@ -34,7 +34,6 @@ public class PostAdapter extends BaseAdapter {
             .fitCenter()
             .priority(Priority.HIGH);
 
-
     public PostAdapter(Context context, List<Post> images){
         this.context = context;
         this.images = images;
@@ -65,14 +64,18 @@ public class PostAdapter extends BaseAdapter {
                 inflater = LayoutInflater.from(this.context);
                 convertView = inflater.inflate(R.layout.post_item, parent, false);
                 holder.image = convertView.findViewById(R.id.pictureIV);
+                holder.description = convertView.findViewById(R.id.pictureDescriptionTV);
+                holder.postOwner = convertView.findViewById(R.id.postOwnerTV);
                 convertView.setTag(holder);
             }
             else {
                 holder = (ImageHolder) convertView.getTag();
             }
 
-           Glide.with(context).load(Uri.parse(currentImage.getPictureUri())).apply(options).into(holder.image);
-            //holder.image.setImageDrawable(currentImage.getDrawable());
+            Glide.with(context).load(Uri.parse(currentImage.getPictureUri())).apply(options).into(holder.image);
+            holder.description.setText(currentImage.getDescription());
+            holder.postOwner.setText("Posted by " + currentImage.getUserDisplayName());
+
         }
         catch (Exception ex){
             Log.e(TAG, "Eroarea : " + Arrays.toString(ex.getStackTrace()));
@@ -82,5 +85,7 @@ public class PostAdapter extends BaseAdapter {
 
     private class ImageHolder {
         ImageView image;
+        TextView description;
+        TextView postOwner;
     }
 }
