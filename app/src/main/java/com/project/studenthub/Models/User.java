@@ -20,7 +20,7 @@ public class User {
     }
 
     public User (){
-
+        this.classes = new HashMap<>();
     }
 
     public String getUID() {

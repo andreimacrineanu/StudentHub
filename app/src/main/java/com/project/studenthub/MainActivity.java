@@ -104,6 +104,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        uploadImageBTN = findViewById(R.id.uploadBTN);
+        postsLV = findViewById(R.id.postsLV);
+        cursTitleTV = findViewById(R.id.classTitleTV);
 
         Toast.makeText(App.getInstance(),"Welcome " + Utils.currentUser.getPrenume() + " !",Toast.LENGTH_SHORT).show();
         storageReference = FirebaseStorage.getInstance().getReference();
@@ -124,9 +127,7 @@ public class MainActivity extends AppCompatActivity
         AddClassesToDrawer();
 
 
-        uploadImageBTN = findViewById(R.id.uploadBTN);
-        postsLV = findViewById(R.id.postsLV);
-        cursTitleTV = findViewById(R.id.classTitleTV);
+
 
         uploadImageBTN.setOnClickListener(new View.OnClickListener() {
             @Override

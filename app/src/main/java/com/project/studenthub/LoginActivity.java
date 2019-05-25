@@ -2,6 +2,7 @@ package com.project.studenthub;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,6 +29,16 @@ import com.project.studenthub.Models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Scanner;
+
 import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
 import retrofit2.Call;
@@ -44,13 +55,13 @@ public class LoginActivity extends AppCompatActivity {
     private Button registerBTN, loginBTN;
     private EditText emailET, passwordET;
     private FirebaseAuth mAuth;
-    private static final String apiKey = "AIzaSyCw6dLHoce8gNL7Rni-AUStAe2VCmIc8A4";
+
     private String pictureJson = "{"+
             "\"requests\": [" +
             "{ " +
             "\"image\": {"+
             "\"source\": {"+
-            "\"imageUri\": \"salut\""+
+            "\"imageUri\": \"https:\\/\\/firebasestorage.googleapis.com\\/v0\\/b\\/studenthub-3a6ba.appspot.com\\/o\\/images%2Fusers%2F5Hca5XsTMMaYL3uEVLVHrtaQPFI2%2F25052019_0019587263388878344898660.jpg?alt=media&token=141b66f3-a5a2-4d3a-9ab6-e2c200eab5d8\""+
             "}"+
             "}," +
             "\"features\": ["+
@@ -67,44 +78,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        String url = "http://my-json-feed";
-        Gson gson = new Gson();
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(pictureJson);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        try {
-            jsonObject.getJSONArray("requests").getJSONObject(0).getJSONObject("image").getJSONObject("source").put("imageUri","https:\\/\\/firebasestorage.googleapis.com\\/v0\\/b\\/studenthub-3a6ba.appspot.com\\/o\\/images%2Fusers%2F5Hca5XsTMMaYL3uEVLVHrtaQPFI2%2F25052019_0019587263388878344898660.jpg?alt=media&token=141b66f3-a5a2-4d3a-9ab6-e2c200eab5d8");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://vision.googleapis.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        ImageAPI imageAPI = retrofit.create(ImageAPI.class);
-
-        Call<ResponseBody> call = imageAPI.sendImage(apiKey, jsonObject);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Log.d(TAG, "Acesta este raspunsul : " + response.body().toString());
-                }catch(Exception ex){
-                    Log.d(TAG, "NU A MERS 1 : " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d(TAG, "NU A MERS : " + t.getMessage());
-            }
-        });
-        Log.d(TAG,"Acesta este jsonu-ul : " + jsonObject.toString());
 
         loginBTN = findViewById(R.id.loginBTN);
         registerBTN = findViewById(R.id.registerBTN);
@@ -150,11 +123,12 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     public void onStart() {
         super.onStart();
-        emailET.setText("test@gmail.com");
-        passwordET.setText("123456");
+//        emailET.setText("test@gmail.com");
+//        passwordET.setText("123456");
         //loginBTN.performClick();
         // Check if user is signed in (non-null) and update UI accordingly.
         //FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -169,7 +143,11 @@ public class LoginActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     Utils.currentUser = new User();
                     Utils.currentUser = dataSnapshot.getValue(User.class);
-                    Log.d(TAG,"Cursurile : " + Utils.currentUser.getClasses().toString());
+                    try {
+                        Log.d(TAG, "Cursurile : " + Utils.currentUser.getClasses().toString());
+                    }catch(Exception ex){
+                        Log.d(TAG,ex.getMessage());
+                    }
                     Intent intent = new Intent(App.getInstance(), MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);

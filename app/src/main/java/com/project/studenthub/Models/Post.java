@@ -2,13 +2,16 @@ package com.project.studenthub.Models;
 
 import android.net.Uri;
 
-public class Post {
+import java.io.Serializable;
+
+public class Post implements Serializable {
     private String id;
     private String description;
     private String convertedPicture;
     private String userId;
     private String userDisplayName;
     private String pictureUri;
+    private String classId;
 
     public String getId() {
         return id;
@@ -56,6 +59,14 @@ public class Post {
 
     public void setPictureUri(String pictureUri) {
         this.pictureUri = pictureUri;
+    }
+
+    public String getClassId() {
+        return classId;
+    }
+
+    public void setClassId(String classId) {
+        this.classId = classId;
     }
 
     public Post(){

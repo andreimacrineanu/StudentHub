@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -28,7 +29,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -41,11 +44,24 @@ import com.project.studenthub.Models.Post;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import okhttp3.internal.Util;
 import retrofit2.Call;
@@ -68,7 +84,10 @@ public class UploadImageActivity extends AppCompatActivity {
     private FirebaseStorage firebaseStorage;
     private Image currentImage = null;
     private String classId;
-    private static final String apiKey = "AIzaSyCw6dLHoce8gNL7Rni-AUStAe2VCmIc8A4";
+    private static final String TARGET_URL =
+            "https://vision.googleapis.com/v1/images:annotate?";
+    private static final String API_KEY =
+            "key=AIzaSyCw6dLHoce8gNL7Rni-AUStAe2VCmIc8A4";
     private EditText descriptionET;
     private String pictureJson = "{"+
             "\"requests\": [" +
@@ -160,44 +179,36 @@ public class UploadImageActivity extends AppCompatActivity {
                                                 post.setPictureUri(uri.toString());
                                                 post.setDescription(descriptionET.getText().toString().trim());
                                                 post.setId(Utils.mDatabase.child("posts").child(classId).push().getKey());
+                                                post.setClassId(classId);
                                                 Utils.mDatabase.child("posts").child(classId).child(post.getId()).setValue(post).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         //while(!task.isComplete()){}
                                                         if (task.isSuccessful()) {
-                                                            progressBar.dismiss();
-//                                                            try {
-                                                                Gson gson = new Gson();
-//                                                                JSONObject jsonObject = new JSONObject(pictureJson);
-//                                                                jsonObject.getJSONArray("requests").getJSONObject(0).getJSONObject("image").getJSONObject("source").put("imageUri",post.getPictureUri());
-//                                                                Retrofit retrofit = new Retrofit.Builder()
-//                                                                        .baseUrl(BASE_URL)
-//                                                                        .addConverterFactory(GsonConverterFactory.create())
-//                                                                        .build();
-//
-//                                                                ImageAPI imageAPI = retrofit.create(ImageAPI.class);
-//                                                                Call<JSONObject> call = imageAPI.sendImage(jsonObject);
-//                                                                call.enqueue(new Callback<JSONObject>() {
-//                                                                    @Override
-//                                                                    public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
-//                                                                        try {
-//                                                                            Log.d(TAG, "Acesta este raspunsul : " + response.body().toString());
-//                                                                        }catch(Exception ex){
-//                                                                            Log.d(TAG, "NU A MERS 1 : " + response.message());
-//                                                                        }
-//                                                                    }
-//
-//                                                                    @Override
-//                                                                    public void onFailure(Call<JSONObject> call, Throwable t) {
-//                                                                        Log.d(TAG, "NU A MERS : " + t.getMessage());
-//                                                                    }
-//                                                                });
-//                                                                Log.d(TAG,"Acesta este jsonu-ul : " + jsonObject.toString());
-//                                                            } catch (JSONException e) {
-//                                                                e.printStackTrace();
-//                                                            }
-                                                            Toast.makeText(App.getInstance(), "Upload Success", Toast.LENGTH_LONG);
-                                                            finish();
+                                                            try {
+                                                            ExecutorService executorService = Executors.newCachedThreadPool();
+                                                            JSONObject jsonObject = new JSONObject(pictureJson);
+                                                            jsonObject.getJSONArray("requests").getJSONObject(0).getJSONObject("image").getJSONObject("source").put("imageUri", post.getPictureUri());
+
+                                                            Future<String> getImageText = getImageText(executorService, jsonObject);
+                                                            while(!getImageText.isDone()){
+                                                                Log.d(TAG, "Converting your image ... ");
+                                                            }
+                                                            String result = getImageText.get();
+                                                            System.out.println("Textul : " +result);
+                                                            Utils.mDatabase.child("posts").child(classId).child(post.getId()).child("convertedPicture").setValue(result).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void aVoid) {
+                                                                    progressBar.dismiss();
+                                                                    Toast.makeText(App.getInstance(), "Upload Success", Toast.LENGTH_LONG);
+                                                                    finish();
+                                                                }
+                                                            });
+                                                            }catch(Exception ex){
+
+                                                            }
+
+
                                                         }
                                                     }
                                                 });
@@ -223,6 +234,64 @@ public class UploadImageActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private Future<String> getImageText (ExecutorService executor, JSONObject jsonObject){
+        return executor.submit(()->{
+            URL serverUrl = null;
+            try {
+                serverUrl = new URL(TARGET_URL + API_KEY);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            URLConnection urlConnection = null;
+            try {
+                urlConnection = serverUrl.openConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            HttpURLConnection httpConnection = (HttpURLConnection)urlConnection;
+            try {
+                httpConnection.setRequestMethod("POST");
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            }
+            httpConnection.setRequestProperty("Content-Type", "application/json");
+            httpConnection.setDoOutput(true);
+            try {
+                BufferedWriter httpRequestBodyWriter = new BufferedWriter(new
+                        OutputStreamWriter(httpConnection.getOutputStream()));
+                httpRequestBodyWriter.write
+                        (jsonObject.toString());
+                httpRequestBodyWriter.close();
+                String response = httpConnection.getResponseMessage();
+                if (httpConnection.getInputStream() == null) {
+                    System.out.println("No stream");
+                    return null;
+                }
+
+                Scanner httpResponseScanner = new Scanner (httpConnection.getInputStream());
+                String resp = "";
+                while (httpResponseScanner.hasNext()) {
+                    String line = httpResponseScanner.nextLine();
+                    resp += line;
+                    //   System.out.println(line);  //  alternatively, print the line of response
+                }
+                httpResponseScanner.close();
+                //System.out.println("raspunsul : " + resp);
+                JSONObject respJson = new JSONObject(resp);
+                String result = respJson.getJSONArray("responses").getJSONObject(0)
+                        .getJSONArray("textAnnotations").getJSONObject(0).get("description").toString();
+                System.out.println("Raspuns in functie : " + result);
+                return result;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.project.studenthub.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -16,8 +17,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.project.studenthub.App;
 import com.project.studenthub.Models.Image;
 import com.project.studenthub.Models.Post;
+import com.project.studenthub.PostInformationActivity;
 import com.project.studenthub.R;
 
 import java.util.Arrays;
@@ -75,7 +78,14 @@ public class PostAdapter extends BaseAdapter {
             Glide.with(context).load(Uri.parse(currentImage.getPictureUri())).apply(options).into(holder.image);
             holder.description.setText(currentImage.getDescription());
             holder.postOwner.setText("Posted by " + currentImage.getUserDisplayName());
-
+            holder.image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(App.getInstance(), PostInformationActivity.class);
+                    intent.putExtra("post", currentImage);
+                    context.startActivity(intent);
+                }
+            });
         }
         catch (Exception ex){
             Log.e(TAG, "Eroarea : " + Arrays.toString(ex.getStackTrace()));
